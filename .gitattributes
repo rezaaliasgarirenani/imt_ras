@@ -1,0 +1,223 @@
+# Cross-OS Git policy for a shared Windows/Ubuntu working tree.
+# Store text with LF line endings and keep known binary formats untouched.
+
+* text=auto eol=lf
+
+###############################################################################
+# Repository metadata and documentation
+###############################################################################
+.gitattributes text eol=lf
+.gitignore text eol=lf
+.editorconfig text eol=lf
+*.gitignore text eol=lf
+*.md text eol=lf
+*.markdown text eol=lf
+*.rst text eol=lf
+*.txt text eol=lf
+*.diff text eol=lf
+*.patch text eol=lf
+
+###############################################################################
+# LaTeX, BibTeX, and related text sources
+###############################################################################
+*.tex text eol=lf
+*.latex text eol=lf
+*.bib text eol=lf
+*.bst text eol=lf
+*.cls text eol=lf
+*.sty text eol=lf
+*.bbx text eol=lf
+*.cbx text eol=lf
+*.lbx text eol=lf
+*.ist text eol=lf
+*.latexmkrc text eol=lf
+
+###############################################################################
+# Scripts and programming languages
+###############################################################################
+*.sh text eol=lf
+*.bash text eol=lf
+*.zsh text eol=lf
+*.fish text eol=lf
+*.ps1 text eol=lf
+*.bat text eol=lf
+*.cmd text eol=lf
+*.py text eol=lf
+*.pyw text eol=lf
+*.ipynb text eol=lf
+*.m text eol=lf
+*.c text eol=lf
+*.cc text eol=lf
+*.cpp text eol=lf
+*.cxx text eol=lf
+*.h text eol=lf
+*.hh text eol=lf
+*.hpp text eol=lf
+*.hxx text eol=lf
+*.java text eol=lf
+*.js text eol=lf
+*.jsx text eol=lf
+*.ts text eol=lf
+*.tsx text eol=lf
+*.css text eol=lf
+*.scss text eol=lf
+*.html text eol=lf
+*.htm text eol=lf
+*.xml text eol=lf
+*.svg text eol=lf
+*.json text eol=lf
+*.jsonc text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.toml text eol=lf
+*.ini text eol=lf
+*.cfg text eol=lf
+*.conf text eol=lf
+*.csv text eol=lf
+*.tsv text eol=lf
+*.sql text eol=lf
+*.r text eol=lf
+*.R text eol=lf
+*.Rmd text eol=lf
+*.jl text eol=lf
+*.go text eol=lf
+*.rs text eol=lf
+*.rb text eol=lf
+*.php text eol=lf
+*.lua text eol=lf
+*.pl text eol=lf
+*.pm text eol=lf
+*.swift text eol=lf
+*.kt text eol=lf
+*.kts text eol=lf
+*.scala text eol=lf
+*.properties text eol=lf
+*.env text eol=lf
+.env text eol=lf
+.env.* text eol=lf
+CMakeLists.txt text eol=lf
+*.cmake text eol=lf
+Makefile text eol=lf
+makefile text eol=lf
+*.mk text eol=lf
+Dockerfile text eol=lf
+Containerfile text eol=lf
+
+###############################################################################
+# HDL, FPGA, EDA, and project text files
+###############################################################################
+*.v text eol=lf
+*.vh text eol=lf
+*.sv text eol=lf
+*.svh text eol=lf
+*.vhd text eol=lf
+*.vhdl text eol=lf
+*.xdc text eol=lf
+*.sdc text eol=lf
+*.tcl text eol=lf
+*.do text eol=lf
+*.xpr text eol=lf
+*.xci text eol=lf
+*.bd text eol=lf
+*.drawio text eol=lf
+*.code-workspace text eol=lf
+*.code-snippets text eol=lf
+*.rpt text eol=lf
+*.jou text eol=lf
+*.str text eol=lf
+*.log text eol=lf
+
+# Extensionless helper scripts currently tracked in this repository.
+codes/repos/* text eol=lf
+
+###############################################################################
+# Documents and office formats
+###############################################################################
+*.pdf -text -diff -merge !eol
+*.doc -text -diff -merge !eol
+*.docx -text -diff -merge !eol
+*.xls -text -diff -merge !eol
+*.xlsx -text -diff -merge !eol
+*.xlsm -text -diff -merge !eol
+*.ppt -text -diff -merge !eol
+*.pptx -text -diff -merge !eol
+*.odt -text -diff -merge !eol
+*.ods -text -diff -merge !eol
+*.odp -text -diff -merge !eol
+*.rtf -text -diff -merge !eol
+
+###############################################################################
+# Images, audio, and video
+###############################################################################
+*.png -text -diff -merge !eol
+*.jpg -text -diff -merge !eol
+*.jpeg -text -diff -merge !eol
+*.gif -text -diff -merge !eol
+*.bmp -text -diff -merge !eol
+*.tif -text -diff -merge !eol
+*.tiff -text -diff -merge !eol
+*.ico -text -diff -merge !eol
+*.webp -text -diff -merge !eol
+*.heic -text -diff -merge !eol
+*.svgz -text -diff -merge !eol
+*.mp3 -text -diff -merge !eol
+*.wav -text -diff -merge !eol
+*.flac -text -diff -merge !eol
+*.ogg -text -diff -merge !eol
+*.mp4 -text -diff -merge !eol
+*.m4v -text -diff -merge !eol
+*.mov -text -diff -merge !eol
+*.avi -text -diff -merge !eol
+*.mkv -text -diff -merge !eol
+*.webm -text -diff -merge !eol
+*.mjpeg -text -diff -merge !eol
+*.raw -text -diff -merge !eol
+
+###############################################################################
+# Archives, compressed files, installers, and disk images
+###############################################################################
+*.zip -text -diff -merge !eol
+*.7z -text -diff -merge !eol
+*.rar -text -diff -merge !eol
+*.tar -text -diff -merge !eol
+*.gz -text -diff -merge !eol
+*.tgz -text -diff -merge !eol
+*.bz2 -text -diff -merge !eol
+*.xz -text -diff -merge !eol
+*.lz -text -diff -merge !eol
+*.lzma -text -diff -merge !eol
+*.zst -text -diff -merge !eol
+*.iso -text -diff -merge !eol
+*.dmg -text -diff -merge !eol
+*.exe -text -diff -merge !eol
+*.dll -text -diff -merge !eol
+*.so -text -diff -merge !eol
+*.dylib -text -diff -merge !eol
+
+###############################################################################
+# Fonts, MATLAB/Simulink, notebooks/data, and generated binary artifacts
+###############################################################################
+*.ttf -text -diff -merge !eol
+*.otf -text -diff -merge !eol
+*.woff -text -diff -merge !eol
+*.woff2 -text -diff -merge !eol
+*.eot -text -diff -merge !eol
+*.mat -text -diff -merge !eol
+*.fig -text -diff -merge !eol
+*.slx -text -diff -merge !eol
+*.slxc -text -diff -merge !eol
+*.mlx -text -diff -merge !eol
+*.npy -text -diff -merge !eol
+*.npz -text -diff -merge !eol
+*.pkl -text -diff -merge !eol
+*.pickle -text -diff -merge !eol
+*.joblib -text -diff -merge !eol
+*.h5 -text -diff -merge !eol
+*.hdf5 -text -diff -merge !eol
+*.onnx -text -diff -merge !eol
+*.pt -text -diff -merge !eol
+*.pth -text -diff -merge !eol
+*.dcp -text -diff -merge !eol
+*.bit -text -diff -merge !eol
+*.bin -text -diff -merge !eol
+*.mcs -text -diff -merge !eol

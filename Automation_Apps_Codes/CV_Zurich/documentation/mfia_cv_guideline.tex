@@ -1,0 +1,513 @@
+% !TeX program = lualatex
+% !BIB program = biber
+
+\documentclass[a4paper,12pt]{article}
+
+\usepackage{fontspec}
+\usepackage[english]{babel}
+\usepackage[version=4]{mhchem}
+\usepackage[dvipsnames]{xcolor}
+\usepackage[backend=biber,style=ieee]{biblatex}
+\usepackage[nopatch=footnote]{microtype}
+\usepackage[explicit]{titlesec}
+\usepackage{amsmath}
+\usepackage{newtxtext,newtxmath}
+\usepackage{setspace}
+\usepackage{tocloft}
+\usepackage{indentfirst}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{hyperref}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{siunitx}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{etoolbox}
+\usepackage{csquotes}
+\usepackage{fontawesome5}
+\usepackage{academicons}
+\usepackage{simpleicons}
+\usepackage[
+  a4paper,
+  includeheadfoot,
+  top        = 2.00cm,
+  bottom     = 1.25cm,
+  left       = 2.00cm,
+  right      = 2.00cm,
+  headheight = 0.55cm,
+  headsep    = 0.45cm,
+  footskip   = 0.75cm
+]{geometry}
+
+%----------- SHARED TYPOGRAPHY HELPERS -----------
+% Utility font-size helper so typography stays defined in pt while layout lengths stay in cm.
+\newcommand{\selectptsize}[1]{\fontsize{#1}{\dimexpr #1 * 6 / 5\relax}\selectfont}
+
+%----------- TITLE PAGE LOCAL MACROS -----------
+% Stores thesis metadata and title-page-specific type settings used by the academic front matter.
+\newcommand{\degreeawardvalue}{}
+\newcommand{\universityvalue}{}
+\newcommand{\addressvalue}{}
+\newcommand{\unilogovalue}{}
+\newcommand{\copyyearvalue}{}
+\newcommand{\academicyearvalue}{}
+\newcommand{\orcidvalue}{}
+\newcommand{\rightsstatementvalue}{}
+\newcommand{\majorfieldvalue}{}
+\newcommand{\specializationvalue}{}
+\newcommand{\scientificsupervisorvalue}{}
+\newcommand{\industrialsupervisorvalue}{}
+\newcommand{\degreeaward}[1]{\def\degreeawardvalue{#1}}
+\newcommand{\university}[1]{\def\universityvalue{#1}}
+\newcommand{\address}[1]{\def\addressvalue{#1}}
+\newcommand{\unilogo}[1]{\def\unilogovalue{#1}}
+\newcommand{\copyyear}[1]{\def\copyyearvalue{#1}}
+\newcommand{\academicyear}[1]{\def\academicyearvalue{#1}}
+\newcommand{\orcid}[1]{\def\orcidvalue{#1}}
+\newcommand{\rightsstatement}[1]{\def\rightsstatementvalue{#1}}
+\newcommand{\majorfield}[1]{\def\majorfieldvalue{#1}}
+\newcommand{\specialization}[1]{\def\specializationvalue{#1}}
+\newcommand{\scientificsupervisor}[1]{\def\scientificsupervisorvalue{#1}}
+\newcommand{\industrialsupervisor}[1]{\def\industrialsupervisorvalue{#1}}
+\newcommand{\titlepageaccent}{black}
+\newcommand{\titlepagerulewidth}{0.035cm}
+\newcommand{\titlepageuniversityfontsize}{17pt}
+\newcommand{\titlepageaddressfontsize}{12pt}
+\newcommand{\titlepagesecondaryfontsize}{14pt}
+\newcommand{\titlepagetitlefontsize}{18pt}
+\newcommand{\titlepagemetadatalabelfontsize}{12pt}
+\newcommand{\titlepagemetadatafontsize}{12pt}
+\newcommand{\titlepageyearfontsize}{12pt}
+\newcommand{\rightspagefontsize}{12pt}
+\newcommand{\titlepageuniversityfont}{\selectptsize{\titlepageuniversityfontsize}\bfseries}
+\newcommand{\titlepageaddressfont}{\selectptsize{\titlepageaddressfontsize}}
+\newcommand{\titlepagesecondaryfont}{\selectptsize{\titlepagesecondaryfontsize}}
+\newcommand{\titlepagetitlefont}{\selectptsize{\titlepagetitlefontsize}\bfseries}
+\newcommand{\titlepagemetadatalabelfont}{\selectptsize{\titlepagemetadatalabelfontsize}\bfseries}
+\newcommand{\titlepagemetadatafont}{\selectptsize{\titlepagemetadatafontsize}}
+\newcommand{\titlepageyearfont}{\selectptsize{\titlepageyearfontsize}}
+\newcommand{\rightspagefont}{\selectptsize{\rightspagefontsize}}
+
+%----------- TITLE PAGE LAYOUT MACROS -----------
+% Keeps title-page spacing, widths, and rendering in the mother file so the body only sets metadata.
+\newcommand{\titlepageleftcolumnwidth}{0.72\textwidth}
+\newcommand{\titlepagerightcolumnwidth}{0.22\textwidth}
+\newcommand{\titlepagelogowidth}{3.75cm}
+\newcommand{\titlepageheadergap}{0.15cm}
+\newcommand{\titlepageafterrulegap}{0.45cm}
+\newcommand{\titlepagebeforetitleblock}{0.10\textheight}
+\newcommand{\titlepageafterdoctypegap}{1.5cm}
+\newcommand{\titlepageaftertitlegap}{3.50cm}
+\newcommand{\titlepageafterauthorgap}{0.6cm}
+\newcommand{\titlepageafterrequirementgap}{0.25cm}
+\newcommand{\titlepagebeforemetadatagap}{0.75cm}
+\newcommand{\titlepagebeforeyeargap}{0.75cm}
+\newcommand{\titlepagemetadatawidth}{0.28\textwidth}
+\newcommand{\titlepagemetadatagap}{0.42cm}
+\newcommand{\titlepagegroupstretch}{1}
+\newcommand{\titlepageparindentvalue}{0cm}
+\newcommand{\titlepagetabcolsepvalue}{0cm}
+\newcommand{\titlepagedocumenttype}{Master's Thesis}
+\newcommand{\titlepagedegreepreface}{Submitted in partial fulfillment of the requirements for the degree of}
+\newcommand{\rightspagegroupstretch}{1}
+
+\makeatletter
+\newcommand{\makeacademictitlepage}{%
+  \thispagestyle{empty}%
+  \begingroup
+  \setstretch{\titlepagegroupstretch}%
+  \setlength{\parindent}{\titlepageparindentvalue}%
+  \setlength{\tabcolsep}{\titlepagetabcolsepvalue}%
+  \noindent
+  \begin{minipage}[c]{\titlepageleftcolumnwidth}
+    {\titlepageuniversityfont \universityvalue\par}
+    \vspace{\titlepageheadergap}
+    {\titlepageaddressfont \addressvalue\par}
+  \end{minipage}\hfill
+  \begin{minipage}[c]{\titlepagerightcolumnwidth}
+    \raggedleft
+    \ifx\unilogovalue\empty\else
+      \includegraphics[width=\titlepagelogowidth,keepaspectratio]{\unilogovalue}
+    \fi
+  \end{minipage}
+
+  \vspace{\titlepageafterrulegap}
+  {\color{\titlepageaccent}\rule{\textwidth}{\titlepagerulewidth}\par}
+
+  \vspace*{\titlepagebeforetitleblock}
+  \begin{center}
+    {\titlepagesecondaryfont \titlepagedocumenttype\par}
+    \vspace{\titlepageafterdoctypegap}
+    {\titlepagetitlefont
+     \parbox{1.0\textwidth}{\centering \@title}\par}
+    \vspace{\titlepageaftertitlegap}
+    {\titlepagesecondaryfont \@author\par}
+    \vspace{\titlepageafterauthorgap}
+    {\titlepagesecondaryfont \titlepagedegreepreface\par}
+    \vspace{\titlepageafterrequirementgap}
+    {\titlepagesecondaryfont\bfseries \degreeawardvalue\par}
+  \end{center}
+
+  \vfill
+
+  \vspace{\titlepagebeforemetadatagap}
+  \begin{tabularx}{\textwidth}{@{}>{\titlepagemetadatalabelfont}p{\titlepagemetadatawidth}@{\hspace{\titlepagemetadatagap}}>{\titlepagemetadatafont\arraybackslash}X@{}}
+  Major field & \majorfieldvalue \\
+  Specialization & \specializationvalue \\
+  Scientific supervisor & \scientificsupervisorvalue \\
+  Industrial supervisor & \industrialsupervisorvalue
+  \end{tabularx}
+
+  \vspace{\titlepagebeforeyeargap}
+  \begin{center}
+    {\titlepageyearfont \academicyearvalue\par}
+  \end{center}
+  \endgroup
+  \clearpage
+}
+\newcommand{\makeorcidrightspage}{%
+  \thispagestyle{fancy}%
+  \null
+  \vfill
+  \begin{center}
+  {\setstretch{\rightspagegroupstretch}%
+    {\rightspagefont \textcopyright~\copyyearvalue \par}
+    {\rightspagefont \@author\par}
+    {\rightspagefont ORCID: \orcidvalue \par}
+    {\rightspagefont \rightsstatementvalue \par}
+  }
+  \end{center}
+  \clearpage
+}
+\makeatother
+
+%----------- CV LOCAL MACROS -----------
+% CV-only typography and reusable entry helpers; safe to keep in the shared template preamble.
+\newcommand{\resumeitemfontsize}{10pt}
+\newcommand{\resumedatefontsize}{10pt}
+\newcommand{\resumesubtextfontsize}{10pt}
+\newcommand{\resumeitemfont}{\normalfont\selectptsize{\resumeitemfontsize}}
+\newcommand{\resumedatefont}{\normalfont\selectptsize{\resumedatefontsize}}
+\newcommand{\resumesubtextfont}{\normalfont\selectptsize{\resumesubtextfontsize}}
+\newcommand{\cvsectionfontsize}{12pt}
+\newcommand{\cvnamefontsize}{25pt}
+\newcommand{\cvcontactfontsize}{9pt}
+\newcommand{\cvlinksfontsize}{8pt}
+\newcommand{\cvheadervoffset}{-0.175cm}
+\newcommand{\cvnameafterspace}{0.070cm}
+\newcommand{\cvdividerwidth}{0.015cm}
+\newcommand{\cvdividerheight}{1.35cm}
+\newcommand{\cvheaderleftcolumnwidth}{0.56\textwidth}
+\newcommand{\cvheaderdividercolumnwidth}{0.01\textwidth}
+\newcommand{\cvheaderrightcolumnwidth}{0.41\textwidth}
+\newcommand{\cvwideentrywidthoffset}{6cm}
+\newcommand{\cvskillscolumnwidth}{0.45\textwidth}
+\newcommand{\cvsectionfont}{\scshape\raggedright\selectptsize{\cvsectionfontsize}\bfseries}
+\newcommand{\cvnamefont}{\scshape\selectptsize{\cvnamefontsize}}
+\newcommand{\cvcontactfont}{\normalfont\selectptsize{\cvcontactfontsize}}
+\newcommand{\cvlinksfont}{\normalfont\selectptsize{\cvlinksfontsize}}
+\newcommand{\resumesection}[2]{\section[#1#2]{\textcolor{red}{#1}#2}}
+\newcommand{\resumeSubHeadingListStart}{\begin{itemize}[leftmargin=0.00cm, label={}, itemsep=0.08cm]}
+\newcommand{\resumeSubHeadingListEnd}{\end{itemize}}
+\newcommand{\resumeItemListStart}{\begin{itemize}}
+\newcommand{\resumeItemListEnd}{\end{itemize}}
+\newcommand{\resumeItem}[1]{\item{\resumeitemfont #1}}
+\newcommand{\resumeSubheading}[4]{%
+    \item
+    \begin{tabular*}{1.0\textwidth}[t]{l@{\extracolsep{\fill}}r}
+        \textbf{#1} & {\resumedatefont\bfseries #2} \\
+        {\resumesubtextfont #3} & {\resumesubtextfont #4}
+    \end{tabular*}
+}
+
+%----------- CHAPTER / FRONT MATTER HEADING MACROS -----------
+% Builds thesis-style chapter banners, front-matter headings, and appendix transitions.
+\newif\ifappendixmode
+\appendixmodefalse
+\newcommand{\chaptertitleheight}{2.5cm}
+\newcommand{\chaptertopoffset}{1.50cm}
+\newcommand{\frontmattertopoffset}{\chapterbodyspace}
+\newcommand{\frontmattertitleheight}{2.5cm}
+\newcommand{\chapterlabelgap}{1.00cm}
+\newcommand{\chapterbodyspace}{0.50cm}
+\newcommand{\chapterlabelfontsize}{20pt}
+\newcommand{\chapternumberfontsize}{20pt}
+\newcommand{\chaptertitlefontsize}{20pt}
+\newcommand{\frontmattertitlefontsize}{18pt}
+\newcommand{\chapterlabelfont}{\normalfont\selectptsize{\chapterlabelfontsize}\mdseries}
+\newcommand{\chapternumberfont}{\normalfont\selectptsize{\chapternumberfontsize}\mdseries}
+\newcommand{\chaptertitlefont}{\normalfont\selectptsize{\chaptertitlefontsize}\bfseries}
+\newcommand{\frontmattertitlefont}{\normalfont\selectptsize{\frontmattertitlefontsize}\bfseries}
+\newcommand{\chapterheaderrulewidth}{0.05cm}
+\newcommand{\frontmatterheaderrulewidth}{0.05cm}
+\newcommand{\headingtopoffset}[1]{%
+  \ifhmode
+    \unskip\par
+  \fi
+  \vspace*{#1}%
+}
+\newcommand{\chapterbreak}{%
+  \ifvmode
+    \ifdim\pagetotal=0cm
+    \else
+      \clearpage
+    \fi
+  \else
+    \clearpage
+  \fi
+}
+\newcommand{\chaptertitleblock}[1]{%
+  {\setstretch{1}%
+    \noindent\makebox[\textwidth][c]{\frontmattertitlefont\strut #1\strut}%
+    \par\nobreak
+  }%
+}
+\newcommand{\numberedchaptertitleblock}[3]{%
+  {\setstretch{1}%
+    \noindent\makebox[\textwidth][r]{\chapterlabelfont\strut #1\space \chapternumberfont #2\strut}%
+    \par\nobreak\vspace*{\chapterlabelgap}%
+    \noindent
+    \vbox{%
+      \offinterlineskip
+      \hrule height \chapterheaderrulewidth
+      \vbox to \chaptertitleheight{%
+        \vfil
+        \hbox to \textwidth{\hfill\chaptertitlefont\strut #3\strut}%
+        \vfil
+      }%
+      \hrule height \chapterheaderrulewidth
+    }%
+  }%
+}
+\newcommand{\formattedchaptersection}[1]{%
+  \thispagestyle{plain}%
+  \headingtopoffset{\chaptertopoffset}%
+  \numberedchaptertitleblock{Chapter}{\thesection}{#1}%
+}
+\newcommand{\formattedfrontmattersection}[1]{%
+  \thispagestyle{plain}%
+  \frontmatterheadingblock{#1}%
+}
+\newcommand{\headersectionnumber}{%
+  \ifappendixmode
+    \thesection
+  \else
+    \arabic{section}%
+  \fi
+}
+\newcommand{\appendixheading}[1]{%
+  \clearpage
+  \refstepcounter{section}%
+  \setcounter{subsection}{0}%
+  \setcounter{subsubsection}{0}%
+  \addcontentsline{toc}{section}{Appendix \thesection: #1}%
+  \markboth{\headersectionnumber. #1}{}%
+  \thispagestyle{plain}%
+  \headingtopoffset{\chaptertopoffset}%
+  \numberedchaptertitleblock{Appendix}{\thesection}{#1}%
+  \par\nobreak\vspace{\chapterbodyspace}%
+}
+\let\latexappendix\appendix
+\RenewDocumentCommand{\appendix}{g}{%
+  \ifappendixmode\else
+    \appendixmodetrue
+    \latexappendix
+  \fi
+  \IfValueT{#1}{\appendixheading{#1}}%
+}
+\newcommand{\frontmatterheadingblock}[1]{%
+  \chaptertitleblock{#1}%
+}
+\newcommand{\frontmattertitleblock}[1]{%
+  \thispagestyle{plain}%
+  \headingtopoffset{\frontmattertopoffset}%
+  \frontmatterheadingblock{#1}%
+}
+
+%----------- HEADER / SECTION TYPOGRAPHY MACROS -----------
+% Controls running-header text, subsection typography, and top-of-page spacing behavior.
+\newcommand{\headertextlift}{0.08cm}
+\newcommand{\headerfontsize}{12pt}
+\newcommand{\subsectionfontsize}{12pt}
+\newcommand{\subsubsectionfontsize}{12pt}
+\newcommand{\bulletfontsize}{6pt}
+\newcommand{\headertextstyle}{\normalfont\selectptsize{\headerfontsize}}
+\newcommand{\subsectionfont}{\normalfont\selectptsize{\subsectionfontsize}\bfseries}
+\newcommand{\subsubsectionfont}{\normalfont\selectptsize{\subsubsectionfontsize}\bfseries}
+\newcommand{\bulletfont}{\selectptsize{\bulletfontsize}}
+\newcommand{\headertext}[1]{%
+  \raisebox{\headertextlift}[0cm][0cm]{\headertextstyle #1}%
+}
+\newcommand{\topofpageheadingoffset}[1]{%
+  \ifvmode
+    \ifdim\pagetotal=0cm
+      \vspace*{#1}%
+    \fi
+  \fi
+}
+\newcommand{\topofpagesubsectionspace}{0.05cm}
+\newcommand{\topofpagesubsubsectionspace}{0.05cm}
+
+\renewcommand\labelitemi{$\vcenter{\hbox{{\bulletfont$\bullet$}}}$}
+\renewcommand\labelitemii{$\vcenter{\hbox{{\bulletfont$\bullet$}}}$}
+\renewcommand{\sectionmark}[1]{\markboth{\headersectionnumber. #1}{}}
+
+%----------- TOC / PAGE STYLE PATCHES -----------
+% Makes contents/list titles follow the section styling and suppresses empty header rules.
+\makeatletter
+\setlength{\cftbeforetoctitleskip}{0cm}
+\setlength{\cftaftertoctitleskip}{0cm}
+\setlength{\cftbeforeloftitleskip}{0cm}
+\setlength{\cftafterloftitleskip}{0cm}
+\setlength{\cftbeforelottitleskip}{0cm}
+\setlength{\cftafterlottitleskip}{0cm}
+\renewcommand{\@cftmaketoctitle}{%
+  \section*{\contentsname}%
+}
+\renewcommand{\@cftmakeloftitle}{%
+  \section*{\listfigurename}%
+}
+\renewcommand{\@cftmakelottitle}{%
+  \section*{\listtablename}%
+}
+\renewcommand{\headrule}{%
+  \ifnum\value{section}>0
+    \hrule\@height\headrulewidth \@width\headwidth
+    \vskip-\headrulewidth
+  \fi
+}
+\renewcommand{\headrulewidth}{0.02cm}
+\renewcommand{\thesection}{\Roman{section}}
+\renewcommand{\thesubsection}{\arabic{section}.\arabic{subsection}}
+\renewcommand{\thesubsubsection}{\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
+\renewcommand{\cftsecleader}{\cftdotfill{\cftdotsep}}
+\renewcommand{\cftsecpresnum}{Chapter~}
+\renewcommand{\cftsecaftersnum}{:}
+\renewcommand{\footrulewidth}{0cm}
+\renewcommand{\tabularxcolumn}[1]{m{#1}}
+\makeatother
+
+%----------- GLOBAL DOCUMENT LAYOUT -----------
+% Shared page style, hyperlink colors, list spacing, counters, and paragraph rhythm.
+\pagestyle{fancy}
+\fancyhf{}
+\fancyfoot[C]{\thepage}
+\fancypagestyle{plain}{
+  \fancyhf{}
+  \fancyfoot[C]{\thepage}
+  \renewcommand{\headrulewidth}{0cm}
+}
+\urlstyle{same}
+\AtEveryBibitem{%
+  \ifentrytype{online}
+    {}
+    {\iffieldundef{doi}
+       {}
+       {\clearfield{url}\clearfield{urldate}}}}
+\hypersetup{
+  colorlinks=true,
+  linkcolor=RoyalBlue,
+  urlcolor=RoyalBlue,
+  citecolor=RoyalBlue,
+  anchorcolor=RoyalBlue
+}
+\settowidth{\cftsecnumwidth}{Chapter VIII: }
+
+%----------- DISTANCES -----------
+\setlist[itemize]{topsep=0.105cm, itemsep=0.105cm, parsep=0cm, partopsep=0cm, leftmargin=0.85cm}
+\setlist[enumerate]{topsep=0.105cm, itemsep=0.105cm, parsep=0cm, partopsep=0cm, leftmargin=0.85cm}
+\renewcommand{\arraystretch}{1.5}
+\setstretch{1.5}
+\setlength{\parskip}{0.20cm}
+\setlength{\tabcolsep}{0.175cm}
+\setlength{\footnotesep}{0.525cm}
+\setlength{\skip\footins}{0.525cm}
+\setcounter{secnumdepth}{3}
+\setcounter{tocdepth}{3}
+
+%----------- CAPTION STYLE FIG & TABLE -----------
+\newlength{\floatcaptionskip}
+\newcommand{\tablebodyfont}{\selectptsize{10pt}}
+\DeclareCaptionFont{captionfont}{\selectptsize{10pt}}
+\setlength{\floatcaptionskip}{0.25cm}
+\setlength{\abovecaptionskip}{\floatcaptionskip}
+\setlength{\belowcaptionskip}{\floatcaptionskip}
+\setlength{\arrayrulewidth}{0.2pt}
+\captionsetup{skip=\floatcaptionskip}
+\captionsetup[table]{position=top,font=captionfont}
+% \captionsetup[figure]{position=bottom,font=captionfont}
+\AtBeginEnvironment{tabular}{\tablebodyfont}
+\AtBeginEnvironment{tabularx}{\tablebodyfont}
+\addto\extrasenglish{%
+  \def\equationautorefname{Eq.}%
+}
+\AtBeginDocument{%
+  \def\equationautorefname{Eq.}%
+}
+
+%----------- THESIS STYLE ACTIVATION -----------
+% Activate chapter-style sections, running headers, and bibliography for thesis-like documents.
+\fancyhead[L]{\ifnum\value{section}>0\headertext{R. Aliasgari Renani}\fi}
+\fancyhead[C]{\ifnum\value{section}>0\headertext{MFIA C-V Guideline}\fi}
+\fancyhead[R]{\ifnum\value{section}>0\headertext{13 May 2026}\fi}
+\addbibresource{references_template.bib}
+\pretocmd{\printbibliography}{\clearpage}{}{}
+\titleformat{\section}[block]
+  {}
+  {}
+  {0cm}
+  {\formattedchaptersection{#1}}
+\titleformat{name=\section,numberless}[block]
+  {}
+  {}
+  {0cm}
+  {\formattedfrontmattersection{#1}}
+\titleformat{\subsection}
+  {\setstretch{1}\subsectionfont}
+  {\thesubsection}
+  {0.20cm}
+  {\topofpageheadingoffset{\topofpagesubsectionspace}#1}
+\titleformat{\subsubsection}
+  {\setstretch{1}\subsubsectionfont}
+  {\thesubsubsection}
+  {0.20cm}
+  {\topofpageheadingoffset{\topofpagesubsubsectionspace}#1}
+\titlespacing{\section}{0cm}{0cm}{\chapterbodyspace}
+\titlespacing{name=\section,numberless}{0cm}{\frontmattertopoffset}{\chapterbodyspace}
+\titlespacing{\subsection}{0cm}{0.25cm}{0.00cm}
+\titlespacing{\subsubsection}{0cm}{0.20cm}{0.00cm}
+\let\originalsection\section
+\RenewDocumentCommand{\section}{s m}{%
+  \IfBooleanTF{#1}
+    {\originalsection*{#2}}
+    {%
+      \ifnum\value{section}=0
+        \ifnum\value{page}=1
+        \else
+          \chapterbreak
+        \fi
+      \else
+        \chapterbreak
+      \fi
+      \originalsection{#2}%
+    }%
+}
+
+%----------- CV STYLE ACTIVATION -----------
+% Switch to this block for CV-like documents instead of thesis chapter sections.
+% \titleformat{\section}
+%   {\cvsectionfont}
+%   {}
+%   {0cm}
+%   {#1}
+%   [\color{black}\titlerule]
+% \titlespacing{\section}{0cm}{0.176cm}{0.176cm}
+
+\begin{document}
+
+%----------- DOCUMENT BODY -----------
+\input{mfia_cv_guideline_body}
+
+\end{document}
