@@ -1,6 +1,6 @@
 function ivKeithley4StartExperiment(app)
 %IVKEITHLEY4STARTEXPERIMENT Start-button logic for IV_Keithley_4.
-% Keep this file on the MATLAB path alongside IV_Keithley_4.mlapp.
+% IV_Keithley_4 startup adds this dependencies folder to the MATLAB path.
 % The original callback body is preserved; edit experiment logic here.
 
     %% Initialization:
