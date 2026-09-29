@@ -1,9 +1,11 @@
 function ivKeithley4StartExperiment(app)
 %IVKEITHLEY4STARTEXPERIMENT Start-button logic for IV_Keithley_4.
 % IV_Keithley_4 startup adds this dependencies folder to the MATLAB path.
-% The original callback body is preserved; edit experiment logic here.
+% Measurement sequence retained; prompt choices and current range are configurable.
 
     %% Initialization:
+    % Validate the selected range before opening the instrument connection.
+    rangeCommands = ivKeithley4CurrentRangeCommands(app.CurrentRangeListBox.Value);
     app.defaultFolder = app.DefaultFolderEditField.Value;
     format longE
     app.connectDeviceKeithley();
@@ -102,7 +104,9 @@ function ivKeithley4StartExperiment(app)
     %Measure Settings for KEITHLEY:
     writeline(app.KLYSM2450,'smu.measure.terminals = smu.TERMINALS_REAR')
     writeline(app.KLYSM2450,'smu.measure.sense = smu.SENSE_2WIRE')
-    writeline(app.KLYSM2450,'smu.measure.autorange = smu.ON')
+    for rangeCommandIndex = 1:numel(rangeCommands)
+        writeline(app.KLYSM2450, rangeCommands{rangeCommandIndex});
+    end
     writeline(app.KLYSM2450, strcat('smu.measure.count = ',string(app.Measurecount)))
     writeline(app.KLYSM2450, strcat('smu.measure.nplc = ', string(app.NPLC)))
     % Source Settings for KEITHLEY:
@@ -187,15 +191,20 @@ function ivKeithley4StartExperiment(app)
     app.MeasurementTable.ColumnFormat = {'numeric', 'numeric', 'numeric'};
     app.MeasurementTable.Data = MeasurementtableData;
 
-    prompt={'Enter additional comments:'};
-    dlgtitle='Additional Comments';
-    dims=[1 50];
-    definput={'No additional comments'};
-    app.additionalCommentsCell=inputdlg(prompt,dlgtitle,dims,definput);
-    if isempty (app.additionalCommentsCell)
-        app.additionalComments='No Comments Provided';
-    else
-        app.additionalComments=app.additionalCommentsCell{1};
+    [askComment, askSave] = ivKeithley4PromptOptions(app);
+    app.additionalComments = 'No Comments Provided';
+    app.additionalCommentsCell = {};
+    if askComment
+        prompt={'Enter additional comments:'};
+        dlgtitle='Additional Comments';
+        dims=[1 50];
+        definput={'No additional comments'};
+        app.additionalCommentsCell=inputdlg(prompt,dlgtitle,dims,definput);
+        if isempty (app.additionalCommentsCell)
+            app.additionalComments='No Comments Provided';
+        else
+            app.additionalComments=app.additionalCommentsCell{1};
+        end
     end
 
     app.settings = {
@@ -234,17 +243,19 @@ function ivKeithley4StartExperiment(app)
     'Auto Zero', app.Autozero ;
     };
 
-    [filename, pathname] = uiputfile('.xlsx', 'Save as',app.defaultFolder);
-    if isequal(filename,0) || isequal(pathname,0)
-        app.StateoftheExperimentTextArea.Value=('The Experiment is done, the Data is not saved!');
-        figure(app.UIFigure)
-    else
-        app.StateoftheExperimentTextArea.Value=('The Experiment is done, the Data is saved!');
-        app.measurement_var_names = {'Voltage', 'Current'};
-        app.measurement_table = table(app.voltage_source, app.current_measure ,'VariableNames', app.measurement_var_names);
-        writecell(app.settings, fullfile(pathname, filename), 'Sheet', app.sheet1);
-        writetable(app.measurement_table, fullfile(pathname, filename), 'Sheet', app.sheet2);   
-        figure(app.UIFigure)
+    if askSave
+        [filename, pathname] = uiputfile('.xlsx', 'Save as',app.defaultFolder);
+        if isequal(filename,0) || isequal(pathname,0)
+            app.StateoftheExperimentTextArea.Value=('The Experiment is done, the Data is not saved!');
+            figure(app.UIFigure)
+        else
+            app.StateoftheExperimentTextArea.Value=('The Experiment is done, the Data is saved!');
+            app.measurement_var_names = {'Voltage', 'Current'};
+            app.measurement_table = table(app.voltage_source, app.current_measure ,'VariableNames', app.measurement_var_names);
+            writecell(app.settings, fullfile(pathname, filename), 'Sheet', app.sheet1);
+            writetable(app.measurement_table, fullfile(pathname, filename), 'Sheet', app.sheet2);
+            figure(app.UIFigure)
+        end
     end
 
     app.StartExperimentButton.Enable="on";

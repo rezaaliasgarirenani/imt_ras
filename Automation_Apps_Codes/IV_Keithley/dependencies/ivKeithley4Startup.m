@@ -1,9 +1,38 @@
 function ivKeithley4Startup(app)
 %IVKEITHLEY4STARTUP External implementation of startupFcn.
-% Extracted from IV_Keithley_4.mlapp without changing the original logic.
+% Add runtime controls without modifying the App Designer binary model.
 
     figure(app.UIFigure)
     defaultFallback = fullfile(userpath,'MyAppData');
     app.DefaultFolderEditField.Value = getpref('MyApp','DataFolder', defaultFallback);
+
+    % Blank space immediately left of the Sample Info / Comments row.
+    % Tags allow external callbacks to find controls without new app properties.
+    if isempty(findall(app.UIFigure, 'Tag', 'IVKeithley4AutoComment'))
+        uicheckbox(app.SettingsTab, ...
+            'Text', 'Add Comment prompt auto', 'Value', true, ...
+            'Position', [20 157 235 24], 'FontSize', 14, ...
+            'Tag', 'IVKeithley4AutoComment', ...
+            'Tooltip', 'Ask for additional comments after measurement.');
+    end
+    if isempty(findall(app.UIFigure, 'Tag', 'IVKeithley4AutoSave'))
+        uicheckbox(app.SettingsTab, ...
+            'Text', 'Save Data prompt auto', 'Value', true, ...
+            'Position', [20 121 235 24], 'FontSize', 14, ...
+            'Tag', 'IVKeithley4AutoSave', ...
+            'Tooltip', 'Open Save Data after measurement. Uncheck to save manually later.');
+    end
+
+    selectedRange = app.CurrentRangeListBox.Value;
+    [~, ranges] = ivKeithley4CurrentRangeCommands('Auto');
+    app.CurrentRangeListBox.Items = ranges;
+    if any(strcmp(selectedRange, ranges))
+        app.CurrentRangeListBox.Value = selectedRange;
+    else
+        app.CurrentRangeListBox.Value = 'Auto';
+    end
+    app.CurrentRangeListBox.Tooltip = ...
+        ['Current measurement range. Choose a fixed range above the expected current; ' ...
+         'this does not change Current Limit. 10 nA and 100 nA require rear triax connections.'];
     figure(app.UIFigure)
 end
