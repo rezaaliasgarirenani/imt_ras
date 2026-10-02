@@ -2,7 +2,14 @@ function itKeithley4StartExperiment(app)
 %ITKEITHLEY4STARTEXPERIMENT External implementation of StartExperimentButtonPushed.
 
     %% Initialization:
-    rangeCommands = itKeithley4CurrentRangeCommands(app.CurrentRangeListBox.Value);
+    % Reject incompatible settings before connecting or clearing previous data.
+    try
+        [rangeCommands, ~, requestedRange] = itKeithley4CurrentRangeCommands( ...
+            app.CurrentRangeListBox.Value, app.CurrentLimitEditField.Value);
+    catch setupError
+        uialert(app.UIFigure, setupError.message, 'Current Range / Limit');
+        return;
+    end
     app.defaultFolder = app.DefaultFolderEditField.Value;
     format longE
     app.connectDeviceKeithley();
@@ -83,27 +90,69 @@ function itKeithley4StartExperiment(app)
     app.additionalComments = [];
 
     %% Device Settings:
-    writeline(app.KLYSM2450,'*RST')
-    pause(0.1)
-    %Voltage is the SOURCE function, Current is measurement:
-    writeline(app.KLYSM2450,'smu.measure.func = smu.FUNC_DC_CURRENT')
-    writeline(app.KLYSM2450,'smu.source.func = smu.FUNC_DC_VOLTAGE')
-    writeline(app.KLYSM2450,'frequency=localnode.linefreq')
-    %Measure Settings for KEITHLEY:
-    writeline(app.KLYSM2450,'smu.measure.terminals = smu.TERMINALS_REAR')
-    writeline(app.KLYSM2450,'smu.measure.sense = smu.SENSE_2WIRE')
-    for rangeCommandIndex = 1:numel(rangeCommands)
-        writeline(app.KLYSM2450, rangeCommands{rangeCommandIndex});
+    try
+        writeline(app.KLYSM2450,'smu.source.output = smu.OFF')
+        writeline(app.KLYSM2450,'*RST')
+        pause(0.1)
+        %Voltage is the SOURCE function, Current is measurement:
+        writeline(app.KLYSM2450,'smu.measure.func = smu.FUNC_DC_CURRENT')
+        writeline(app.KLYSM2450,'smu.source.func = smu.FUNC_DC_VOLTAGE')
+        writeline(app.KLYSM2450,'frequency=localnode.linefreq')
+        %Measure Settings for KEITHLEY:
+        writeline(app.KLYSM2450,'smu.measure.terminals = smu.TERMINALS_REAR')
+        writeline(app.KLYSM2450,'smu.measure.sense = smu.SENSE_2WIRE')
+        writeline(app.KLYSM2450, strcat('smu.measure.count = ',string(app.Measurecount)))
+        writeline(app.KLYSM2450, strcat('smu.measure.nplc=', string(app.NPLC)))
+        % Source Settings for KEITHLEY:
+        writeline(app.KLYSM2450,'smu.source.highc = smu.OFF')
+        writeline(app.KLYSM2450,'smu.source.autorange = smu.ON')
+        writeline(app.KLYSM2450,'smu.source.readback = smu.ON')
+        writeline(app.KLYSM2450,'smu.source.offmode = smu.OFFMODE_NORMAL')
+        for rangeCommandIndex = 1:numel(rangeCommands)
+            writeline(app.KLYSM2450, rangeCommands{rangeCommandIndex});
+        end
+
+        % A successful VISA write does not prove that the instrument accepted it.
+        acceptedLimit = str2double(writeread(app.KLYSM2450, 'print(smu.source.ilimit.level)'));
+        acceptedAutorange = str2double(writeread(app.KLYSM2450, 'print(smu.measure.autorange)'));
+        limitTolerance = max(1e-15, abs(app.Currentlimit) * 1e-6);
+        if ~isfinite(acceptedLimit) || acceptedLimit <= 0 || ...
+                abs(acceptedLimit - app.Currentlimit) > limitTolerance
+            error('ItKeithley4:CurrentLimitNotAccepted', ...
+                'Keithley returned Current Limit %.12g A; requested %.12g A. Measurement was not started.', ...
+                acceptedLimit, app.Currentlimit);
+        end
+        if isnan(requestedRange)
+            if acceptedAutorange ~= 1
+                error('ItKeithley4:CurrentRangeNotAccepted', ...
+                    'Keithley did not accept Auto current range. Measurement was not started.');
+            end
+        else
+            acceptedRange = str2double(writeread(app.KLYSM2450, 'print(smu.measure.range)'));
+            if acceptedAutorange ~= 0 || ~isfinite(acceptedRange) || ...
+                    abs(acceptedRange - requestedRange) > requestedRange * 1e-6
+                error('ItKeithley4:CurrentRangeNotAccepted', ...
+                    'Keithley did not accept fixed range %.12g A (read back %.12g A). Measurement was not started.', ...
+                    requestedRange, acceptedRange);
+            end
+        end
+        % Save the confirmed limit in measurement metadata.
+        app.Currentlimit = acceptedLimit;
+        writeline(app.KLYSM2450,'smu.source.output = smu.ON')
+    catch setupError
+        % Do not continue into the measurement loop after a rejected setup.
+        shutdownMessage = '';
+        try
+            writeline(app.KLYSM2450,'smu.source.output = smu.OFF');
+        catch shutdownError
+            shutdownMessage = sprintf('\nOutput-off command failed: %s', shutdownError.message);
+        end
+        app.StartExperimentButton.Enable = 'on';
+        app.IndicatorLamp.Color = 'w';
+        app.StateoftheExperimentTextArea.Value = 'Setup failed; measurement not started.';
+        uialert(app.UIFigure, [setupError.message shutdownMessage], 'Keithley Setup');
+        return;
     end
-    writeline(app.KLYSM2450, strcat('smu.measure.count = ',string(app.Measurecount)))
-    writeline(app.KLYSM2450, strcat('smu.measure.nplc=', string(app.NPLC)))
-    % Source Settings for KEITHLEY:
-    writeline(app.KLYSM2450,'smu.source.highc = smu.OFF')
-    writeline(app.KLYSM2450,'smu.source.autorange = smu.ON')
-    writeline(app.KLYSM2450,'smu.source.readback = smu.ON')
-    writeline(app.KLYSM2450,'smu.source.output = smu.ON')
-    writeline(app.KLYSM2450,'smu.source.offmode = smu.OFFMODE_NORMAL')
-    writeline(app.KLYSM2450, strcat('smu.source.ilimit.level = ', string(app.Currentlimit)))
 
     %% Measurements
     writeline(app.KLYSM2450,'beeper.beep(0.35, 1500); delay(0.35) ; beeper.beep(0.35, 1500)')
