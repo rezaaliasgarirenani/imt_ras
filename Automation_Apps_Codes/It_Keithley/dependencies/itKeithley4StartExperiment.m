@@ -5,7 +5,6 @@ function itKeithley4StartExperiment(app)
     rangeCommands = itKeithley4CurrentRangeCommands(app.CurrentRangeListBox.Value);
     app.defaultFolder = app.DefaultFolderEditField.Value;
     format longE
-    setappdata(app.StateoftheExperimentTextArea, 'KeithleyEvents', cell(0, 1));
     app.connectDeviceKeithley();
     if ~strcmp(app.connectionStatusKeithley,'Connected')
         uialert(app.UIFigure,'Cannot start the experiment because the device is not connected','Connection Error')
@@ -17,7 +16,7 @@ function itKeithley4StartExperiment(app)
     itKeithley4Status(app, ('The Phase: Experiment has started, resetting and initializing parameters'));
     app.StartExperimentButton.Enable="off";
     writeline(app.KLYSM2450, 'localnode.showevents = 0');
-    itKeithley4Status(app, '', 'Previously queued');
+    itKeithley4Status(app, '', 'clear');
     app.stopExperiment = false;
 
     cla(app.It_Plot_Linear)

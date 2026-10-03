@@ -23,6 +23,17 @@ function ivKeithley4Startup(app)
             'Tooltip', 'Open Save Data after measurement. Uncheck to save manually later.');
     end
 
+    % Free column beside measurement settings, above the prompt checkboxes.
+    if isempty(findall(app.UIFigure, 'Tag', 'IVKeithley4DeviceMessages'))
+        messagePanel = uipanel(app.SettingsTab, ...
+            'Title', 'Device messages', 'TitlePosition', 'centertop', ...
+            'Position', [20 206 235 463], 'FontSize', 16);
+        uitextarea(messagePanel, 'Editable', 'off', ...
+            'Position', [8 10 217 418], 'FontSize', 13, ...
+            'Value', {'Device messages will appear here.'}, ...
+            'Tag', 'IVKeithley4DeviceMessages');
+    end
+
     selectedRange = app.CurrentRangeListBox.Value;
     [~, ranges] = ivKeithley4CurrentRangeCommands('Auto');
     app.CurrentRangeListBox.Items = ranges;

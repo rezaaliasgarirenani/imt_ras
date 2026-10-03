@@ -8,7 +8,6 @@ function ivKeithley4StartExperiment(app)
     rangeCommands = ivKeithley4CurrentRangeCommands(app.CurrentRangeListBox.Value);
     app.defaultFolder = app.DefaultFolderEditField.Value;
     format longE
-    setappdata(app.StateoftheExperimentTextArea, 'KeithleyEvents', cell(0, 1));
     app.connectDeviceKeithley();
     if ~strcmp(app.connectionStatusKeithley,'Connected')
         uialert(app.UIFigure,'Cannot start the experiment because the device is not connected','Connection Error')
@@ -20,7 +19,7 @@ function ivKeithley4StartExperiment(app)
     ivKeithley4Status(app, ('Experiment has started, resetting and initializing parameters'));
     app.StartExperimentButton.Enable="off";
     writeline(app.KLYSM2450, 'localnode.showevents = 0');
-    ivKeithley4Status(app, '', 'Previously queued');
+    ivKeithley4Status(app, '', 'clear');
 
     cla(app.IV_Plot_Linear)
     cla(app.IV_Plot_Logarithmic)
