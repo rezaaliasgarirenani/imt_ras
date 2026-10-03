@@ -12,7 +12,7 @@ function ivKeithley4ConnectDevice(app)
         app.connectionStatusKeithley='Connected';
     catch
         app.KEITHLEYSourceMeter2450Lamp.Color='r';
-        app.StateoftheExperimentTextArea.Value=('The Connection to the device has failed!');
+        ivKeithley4Status(app, ('The Connection to the device has failed!'));
         app.connectionStatusKeithley='Not Connected';
     end
 end

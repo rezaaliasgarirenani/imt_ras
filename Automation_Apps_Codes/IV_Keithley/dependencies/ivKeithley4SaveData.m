@@ -50,10 +50,10 @@ function ivKeithley4SaveData(app)
 
     [filename, pathname] = uiputfile('.xlsx', 'Save as',app.defaultFolder);
     if isequal(filename,0) || isequal(pathname,0)
-        app.StateoftheExperimentTextArea.Value=('The Experiment is done, the Data is not saved!');
+        ivKeithley4Status(app, ('The Experiment is done, the Data is not saved!'));
         figure(app.UIFigure)
     else
-        app.StateoftheExperimentTextArea.Value=('The Experiment is done, the Data is saved!');
+        ivKeithley4Status(app, ('The Experiment is done, the Data is saved!'));
         app.measurement_var_names = {'Voltage', 'Current'};
         app.measurement_table = table(app.voltage_source, app.current_measure ,'VariableNames', app.measurement_var_names);
         writecell(app.settings, fullfile(pathname, filename), 'Sheet', app.sheet1);

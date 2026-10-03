@@ -8,6 +8,7 @@ function ivKeithley4StartExperiment(app)
     rangeCommands = ivKeithley4CurrentRangeCommands(app.CurrentRangeListBox.Value);
     app.defaultFolder = app.DefaultFolderEditField.Value;
     format longE
+    setappdata(app.StateoftheExperimentTextArea, 'KeithleyEvents', cell(0, 1));
     app.connectDeviceKeithley();
     if ~strcmp(app.connectionStatusKeithley,'Connected')
         uialert(app.UIFigure,'Cannot start the experiment because the device is not connected','Connection Error')
@@ -16,8 +17,10 @@ function ivKeithley4StartExperiment(app)
     end
     app.stopExperiment = false;
     app.IndicatorLamp.Color='y'; % Yellow means experiment has started
-    app.StateoftheExperimentTextArea.Value=('Experiment has started, resetting and initializing parameters');
+    ivKeithley4Status(app, ('Experiment has started, resetting and initializing parameters'));
     app.StartExperimentButton.Enable="off";
+    writeline(app.KLYSM2450, 'localnode.showevents = 0');
+    ivKeithley4Status(app, '', 'Previously queued');
 
     cla(app.IV_Plot_Linear)
     cla(app.IV_Plot_Logarithmic)
@@ -111,15 +114,19 @@ function ivKeithley4StartExperiment(app)
     writeline(app.KLYSM2450,'smu.source.autorange = smu.ON')
     writeline(app.KLYSM2450,'smu.source.readback = smu.ON')
     writeline(app.KLYSM2450,'smu.source.offmode = smu.OFFMODE_NORMAL')
+    ivKeithley4Status(app, '', 'Initialization');
     writeline(app.KLYSM2450, strcat('smu.source.ilimit.level = ', string(app.Currentlimit)))
+    ivKeithley4Status(app, '', sprintf('Set current limit %.12g A', app.Currentlimit));
     for rangeCommandIndex = 1:numel(rangeCommands)
         writeline(app.KLYSM2450, rangeCommands{rangeCommandIndex});
     end
+    ivKeithley4Status(app, '', ['Set current range ' char(app.CurrentRangeListBox.Value)]);
     writeline(app.KLYSM2450,'smu.source.output = smu.ON')
+    ivKeithley4Status(app, '', 'Output enabled');
 
     %% Measurements
     writeline(app.KLYSM2450,'beeper.beep(0.35, 1500); delay(0.35) ; beeper.beep(0.35, 1500)')
-    app.StateoftheExperimentTextArea.Value=('Measurements have started');
+    ivKeithley4Status(app, ('Measurements have started'));
     app.IndicatorLamp.Color='r';
     writeline(app.KLYSM2450,'Voltage_Current_Buffer = buffer.make(1000),buffer.STYLE_WRITABLE_FULL')
     writeline(app.KLYSM2450,'Voltage_Current_Buffer.clear()')
@@ -141,7 +148,7 @@ function ivKeithley4StartExperiment(app)
             app.current_measure(app.i,1)=mean(str2double(split(writeread(app.KLYSM2450,'printbuffer(1,Voltage_Current_Buffer.n,Voltage_Current_Buffer.readings)'),', ')));       
            
             if mod(k, app.updateInterval) == 0 || k == app.Sweeppoints
-                app.StateoftheExperimentTextArea.Value = sprintf('Measurement point number: %d', app.i);
+                ivKeithley4Status(app, sprintf('Measurement point number: %d', app.i));
                 app.VoltageTextArea.Value = num2str(app.voltage_source(app.i,1));
                 app.CurrentTextArea.Value = num2str(app.current_measure(app.i,1));
                 plot(app.IV_Plot_Linear, app.voltage_source(1:app.i), app.current_measure(1:app.i));
@@ -169,7 +176,7 @@ function ivKeithley4StartExperiment(app)
             app.current_measure(app.i,1)=mean(str2double(split(writeread(app.KLYSM2450,'printbuffer(1,Voltage_Current_Buffer.n,Voltage_Current_Buffer.readings)'),', ')));       
 
             if mod(k, app.updateInterval) == 0 || k == app.Sweeppoints
-                app.StateoftheExperimentTextArea.Value = sprintf('Measurement point number: %d', app.i);
+                ivKeithley4Status(app, sprintf('Measurement point number: %d', app.i));
                 app.VoltageTextArea.Value = num2str(app.voltage_source(app.i,1));
                 app.CurrentTextArea.Value = num2str(app.current_measure(app.i,1));
                 plot(app.IV_Plot_Linear, app.voltage_source(1:app.i), app.current_measure(1:app.i));
@@ -190,6 +197,8 @@ function ivKeithley4StartExperiment(app)
     MeasurementtableData = [(1:app.i-1)', app.voltage_source(1:app.i-1), app.current_measure(1:app.i-1)];
     app.MeasurementTable.ColumnFormat = {'numeric', 'numeric', 'numeric'};
     app.MeasurementTable.Data = MeasurementtableData;
+
+    ivKeithley4Status(app, '', 'Measurement');
 
     [askComment, askSave] = ivKeithley4PromptOptions(app);
     app.additionalComments = 'No Comments Provided';
@@ -246,10 +255,10 @@ function ivKeithley4StartExperiment(app)
     if askSave
         [filename, pathname] = uiputfile('.xlsx', 'Save as',app.defaultFolder);
         if isequal(filename,0) || isequal(pathname,0)
-            app.StateoftheExperimentTextArea.Value=('The Experiment is done, the Data is not saved!');
+            ivKeithley4Status(app, ('The Experiment is done, the Data is not saved!'));
             figure(app.UIFigure)
         else
-            app.StateoftheExperimentTextArea.Value=('The Experiment is done, the Data is saved!');
+            ivKeithley4Status(app, ('The Experiment is done, the Data is saved!'));
             app.measurement_var_names = {'Voltage', 'Current'};
             app.measurement_table = table(app.voltage_source, app.current_measure ,'VariableNames', app.measurement_var_names);
             writecell(app.settings, fullfile(pathname, filename), 'Sheet', app.sheet1);
@@ -267,7 +276,8 @@ function ivKeithley4StartExperiment(app)
     end
 
     pause(1);
-    app.StateoftheExperimentTextArea.Value=('The Experiment is done!');
+    ivKeithley4Status(app, '', 'Finishing experiment');
+    ivKeithley4Status(app, ('The Experiment is done!'));
     app.IndicatorLamp.Color='w';
     app.KEITHLEYSourceMeter2450Lamp.Color='w';
     app.StartExperimentButton.Enable="on";

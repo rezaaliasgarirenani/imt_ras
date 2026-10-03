@@ -153,3 +153,31 @@ unchanged and that the added prompt conditions enclose the intended dialogs.
 MATLAB and instrument execution are not available on this computer. Runtime UI
 layout and hardware behavior must be checked on the work PC. Existing error
 handling and output shutdown order are retained.
+
+## Device messages in State of experiment
+
+The existing text area shows the latest experiment status followed by errors
+and warnings read from the Keithley event log. Messages include severity,
+code, original device text, and the stage where they were retrieved. Previously
+queued messages are labelled separately. The displayed history resets at Start
+and remains visible through progress updates, Stop, and Save Data.
+
+Events are read during setup (including separately after the current limit,
+current range, and output-on commands), after the measurement loop, and after
+finishing commands. There are no event queries between measurement points;
+messages generated during measurement appear after the loop finishes or stops.
+Reading an event consumes its unread remote entry but leaves it in the device's
+front-panel log. Messages are displayed in the app, not added to the saved XLSX.
+The instrument's Log Warning setting must be on to record warnings (full 2450
+reference manual, printed page 3-39); warnings disabled there cannot be retrieved.
+
+The commands are documented in `TSP_Codes_2450.pdf` (in the I-V resources),
+printed pages 14-80 to 14-82 and 14-107. Automatic event output is disabled on
+the active connection so it cannot mix unsolicited messages into measurement
+replies; events are explicitly requested instead. Device messages do not
+change settings or stop a run. A communication failure while reading the log
+is displayed in the text area and propagates as a MATLAB error.
+
+Synchronize the entire dependencies folder, including the new Status helper,
+and relaunch the app. No App Designer edits are needed. MATLAB R2022b and
+hardware verification remain necessary on the work PC.
