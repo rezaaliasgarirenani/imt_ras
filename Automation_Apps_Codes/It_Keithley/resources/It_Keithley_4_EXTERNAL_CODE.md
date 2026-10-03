@@ -63,24 +63,13 @@ its original additional-comment and save dialogs.
 Current Range offers Auto, 10 nA, 100 nA, 1 uA, 10 uA, 100 uA, 1 mA, 10 mA,
 100 mA, and 1 A. Auto is the initial selection. A fixed selection disables
 measurement autorange and sends `smu.measure.range` in amperes after reset and
-function selection. Fixed measurement range constrains the current limit.
-A note below Current Limit updates with the selected range and shows its
-range-based limits in amperes. The app leaves entered values unchanged.
-Pressing Start with an incompatible pair displays an explanation without
-connecting or beginning a measurement. For example, the 100 nA range permits
-10.6 nA to 105 nA (`1.06e-8` to `1.05e-7` A). Other instrument operating
-constraints may also apply. The 10 nA and 100 nA ranges require rear triax
-connections.
-
-Setup keeps output off, sets the requested limit under autorange, then selects
-the fixed range (which automatically disables autorange). Range and limit are
-read back before output is enabled. A mismatch stops setup, and saved metadata
-uses the confirmed limit. This matches I-V's setup handling.
+function selection. The entered current limit is sent before the measurement
+range, with output enabled afterward. Selecting a fixed range can make the
+instrument adjust the current limit and issue a warning (TSP reference,
+printed page 14-202). The 10 nA and 100 nA ranges require rear triax connections.
 
 The command reference is `IV_Keithley/resources/TSP_Codes_2450.pdf`, printed
-pages 14-123, 14-159/160, and 14-201/202 (PDF pages 135, 171/172, and 213/214).
-The fixed-range minimum limit is 10.6% of range (14-202). The maximum is 105%
-of range in the full Rev. E reference, page 4-41. The same range mapping
+pages 14-123 and 14-159/160 (PDF pages 135 and 171/172). The same range mapping
 and runtime UI implementation are used as in the working I-V version, with
 I-t-specific function names and tags. I-t does not depend on the I-V folder
 at runtime.
